@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "391541931401",
+    "firebase_url": "https://karaoke-list.firebaseio.com",
+    "project_id": "karaoke-list",
+    "storage_bucket": "karaoke-list.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:391541931401:android:b5508468ba35d3a8",
+        "android_client_info": {
+          "package_name": "com.mikejones.mykaraokelist"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "391541931401-kss2v1qtct1ambja1fo6e39hr9v6k37q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mikejones.mykaraokelist",
+            "certificate_hash": "5b25a2b76ff875404e21f7f3712d2bf6da9fd53a"
+          }
+        },
+        {
+          "client_id": "391541931401-g2feurfh02cbcpl0fe541optt4pcbc5l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8bnerr9oVZJ515fuKH-LscAVnybX5ag4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "391541931401-g2feurfh02cbcpl0fe541optt4pcbc5l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
