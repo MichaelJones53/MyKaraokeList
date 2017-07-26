@@ -1,7 +1,9 @@
 package com.mikejones.mykaraokelist;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -12,12 +14,14 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 
-public class ListActivity extends AppCompatActivity {
+public class ListActivity extends AppCompatActivity implements AddSongDialog.AddSongDialogListener {
 
     private ListView songListView;
     private SongListviewAdapter songListviewAdapter;
@@ -31,6 +35,11 @@ public class ListActivity extends AppCompatActivity {
     private Animation hideAudioFABAnimation;
     private Animation rotateForwardMainFABAnimation;
     private Animation rotateBackwardMainFABAnimation;
+    private AddSongDialog dialog;
+    private DatabaseManager songDatabase;
+
+
+    private String test = "test";
 
     private boolean buttonsShown = false;
 
@@ -40,6 +49,9 @@ public class ListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
         toolbar = (Toolbar) findViewById(R.id.bottomToolBar);
+
+
+        songDatabase = new DatabaseManager(this);
 
 
 
@@ -99,6 +111,17 @@ public class ListActivity extends AppCompatActivity {
             }
         });
 
+
+        manualEntryFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //show dialog box for user to enter song and artist name
+                showNewSongDialog();
+
+
+
+            }
+        });
 
 
 
@@ -185,4 +208,30 @@ public class ListActivity extends AppCompatActivity {
         audioEntryFAB.startAnimation(hideAudioFABAnimation);
         audioEntryFAB.setClickable(false);
     }
+
+
+    private void showNewSongDialog() {
+        FragmentManager fm = getSupportFragmentManager();
+        dialog = AddSongDialog.newInstance();
+        dialog.show(fm, "fragment_edit_name");
+    }
+
+
+    @Override
+    public void onReturnNewSong(Song song) {
+        //TODO: deal with new song
+        //add song to list
+
+        songDatabase.addSong(song);
+
+        System.out.println(songDatabase.printDatabase());
+        //add song to DB
+        //add song to firebase
+        dialog.dismiss();
+
+
+    }
+
+
+
 }

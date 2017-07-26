@@ -6,12 +6,10 @@ package com.mikejones.mykaraokelist;
 
 public class Song {
 
+    private int id;
     private String title;
     private String artist;
     private String lyrics = null;
-    private int year;
-    private String album;
-    private String genre;
     private int rating = 0;
 
 
@@ -23,6 +21,15 @@ public class Song {
     public Song(String title, String artist){
         this.title = title;
         this.artist = artist;
+    }
+
+    public Song(int id, String title, String artist, String lyrics, int rating){
+
+        this.id = id;
+        this.title = title;
+        this.artist = artist;
+        this.lyrics = lyrics;
+        this.rating = rating;
     }
 
     public String getTitle() {
@@ -41,32 +48,16 @@ public class Song {
         this.artist = artist;
     }
 
-    public int getYear() {
-        return year;
-    }
-
-    public void setYear(int year) {
-        this.year = year;
-    }
-
-    public String getAlbum() {
-        return album;
-    }
-
-    public void setAlbum(String album) {
-        this.album = album;
-    }
-
-    public String getGenre() {
-        return genre;
-    }
-
-    public void setGenre(String genre) {
-        this.genre = genre;
-    }
-
     public String getLyrics() {
         return lyrics;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setLyrics(String lyrics) {
@@ -93,5 +84,13 @@ public class Song {
             }
         }
 
+    }
+
+    public String toString(){
+        return "\nID: "+id+ "\n"
+                +"Title: "+title+ "\n"
+                +"Artist: "+artist+"\n"
+                +"Lyrics: "+lyrics+"\n"
+                +"rating: "+rating+"\n_";
     }
 }

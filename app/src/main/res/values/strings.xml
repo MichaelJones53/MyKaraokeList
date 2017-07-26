@@ -23,4 +23,5 @@
     <string name="song_title">Song Title</string>
     <string name="lyrics_image">lyricsImage</string>
     <string name="sign_out">Sign Out</string>
+    <string name="add_new_song">Add New Song</string>
 </resources>
