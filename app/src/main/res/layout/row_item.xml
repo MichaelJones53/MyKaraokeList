@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.chauthai.swipereveallayout.SwipeRevealLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swipe_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="3dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:layout_marginTop="3dp"
+    android:background="@android:color/transparent"
+    app:dragEdge="right"
+    app:mode="normal">
+
+
+    <!-- Your secondary layout here -->
+    <FrameLayout
+        android:id="@+id/delete_layout"
+        android:layout_width="140dp"
+
+        android:layout_height="wrap_content"
+
+        >
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            >
+
+            <ImageView
+                android:id="@+id/deleteImageView"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/delete_background_rounded"
+                android:padding="15dp"
+                app:srcCompat="@android:drawable/ic_menu_delete" />
+
+            <ImageView
+                android:id="@+id/editImageView"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_toRightOf="@+id/deleteImageView"
+                android:padding="15dp"
+                android:background="@drawable/edit_background_rounded"
+
+                app:srcCompat="@android:drawable/ic_menu_edit" />
+        </RelativeLayout>
+
+
+    </FrameLayout>
+
+    <!-- Your main layout here -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/list_background_rounded_corners"
+        >
+
+        <RelativeLayout
+            android:id="@+id/entryLayout"
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/lyrics_button"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_margin="5dp"
+                android:background="@drawable/scroll"
+                android:contentDescription="@string/lyrics_image"
+                android:padding="5dp"
+                android:scaleType="fitXY" />
+
+
+            <TextView
+                android:id="@+id/songTitleTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_toLeftOf="@+id/lyrics_button"
+                android:layout_toStartOf="@+id/lyrics_button"
+                android:fontFamily="serif"
+                android:padding="5dp"
+                android:text="some really really reall long name"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/artistTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/songTitleTextView"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_toLeftOf="@+id/lyrics_button"
+                android:layout_toStartOf="@+id/lyrics_button"
+                android:fontFamily="serif"
+                android:padding="5dp"
+                android:text="artist name" />
+
+        </RelativeLayout>
+    </FrameLayout>
+
+</com.chauthai.swipereveallayout.SwipeRevealLayout>

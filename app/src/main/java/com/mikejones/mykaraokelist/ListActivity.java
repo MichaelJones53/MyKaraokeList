@@ -1,29 +1,44 @@
 package com.mikejones.mykaraokelist;
 
-import android.app.Activity;
+
+
 import android.content.Intent;
+
+
+import android.graphics.Color;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+
 import android.widget.FrameLayout;
-import android.widget.ListView;
-import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
+
+
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 
-public class ListActivity extends AppCompatActivity implements AddSongDialog.AddSongDialogListener {
+public class ListActivity extends AppCompatActivity implements AddSongDialog.AddSongDialogListener{
+    public static final String TAG = "ListActivity";
+    public static final int ITEM_SPACING = 40;
 
-    private ListView songListView;
+    private RecyclerView songListView;
     private SongListviewAdapter songListviewAdapter;
     private Toolbar toolbar;
     private FloatingActionButton mainFAB;
@@ -35,11 +50,11 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
     private Animation hideAudioFABAnimation;
     private Animation rotateForwardMainFABAnimation;
     private Animation rotateBackwardMainFABAnimation;
-    private AddSongDialog dialog;
-    private DatabaseManager songDatabase;
+    private DialogFragment dialog;
+    private FirebaseManger db;
 
 
-    private String test = "test";
+
 
     private boolean buttonsShown = false;
 
@@ -48,46 +63,24 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
+
+        initalizeDatabase();
+        initalizeAnimations();
+        initalizeViews();
+
+
+    }
+
+    private void initalizeDatabase(){
+        db = new FirebaseManger();
+    }
+
+
+    private void initalizeViews(){
         toolbar = (Toolbar) findViewById(R.id.bottomToolBar);
-
-
-        songDatabase = new DatabaseManager(this);
-
-
-
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        rotateForwardMainFABAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate_forward_main_fab);
-        rotateBackwardMainFABAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate_reverse_main_fab);
-
-        hideManualFABAnimation = AnimationUtils.loadAnimation(this, R.anim.hide_manual_fab);
-        showManualFABAnimation = AnimationUtils.loadAnimation(this, R.anim.show_manual_fab);
-
-        hideAudioFABAnimation = AnimationUtils.loadAnimation(this, R.anim.hide_audio_fab);
-        showAudioFABAnimation = AnimationUtils.loadAnimation(this, R.anim.show_audio_fab);
-
-
-        //************************ temp data
-        ArrayList<Song> songs = new ArrayList<>();
-        songs.add(new Song("some weird song", "yo moma"));
-        songs.add(new Song("table for 1", "the brothers grim"));
-        songs.add(new Song("lazy bones", "yes sur"));
-        songs.add(new Song("i think i love you more than anything in the world", "some artist"));
-        songs.add(new Song("donkey lover", "testing testing"));
-        songs.add(new Song("pupers pupadup", "some other artist"));
-        songs.add(new Song("activate the laser", "the Dr. Evils"));
-        songs.add(new Song("she loves me not", "the heartbreakers and tom petty and cher and some other people"));
-        songs.add(new Song("lazy bones", "yes sur"));
-        songs.add(new Song("i think i love you more than anything in the world", "some artist"));
-        songs.add(new Song("Puddin' pop", "Mr. J.T."));
-        songs.add(new Song("pupers pupadup", "some other artist"));
-        //************************
-
-
-        songListView = (ListView) findViewById(R.id.songListView);
-        songListviewAdapter = new SongListviewAdapter(this, R.layout.song_list_layout,songs);
-        songListView.setAdapter(songListviewAdapter);
+        songListView = (RecyclerView) findViewById(R.id.songListView);
 
         mainFAB = (FloatingActionButton) findViewById(R.id.mainFloatingActionButton);
         manualEntryFAB = (FloatingActionButton) findViewById(R.id.manualEntryFAB);
@@ -117,20 +110,42 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
             public void onClick(View v) {
                 //show dialog box for user to enter song and artist name
                 showNewSongDialog();
+                if(buttonsShown){
 
+                    hideFABs();
+                    mainFAB.startAnimation(rotateBackwardMainFABAnimation);
+                    buttonsShown = false;
+                }
+
+            }
+        });
+
+        audioEntryFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                showAudioFingerprintDialog();
 
 
             }
         });
 
 
+    }
 
+    private void initalizeAnimations(){
+        rotateForwardMainFABAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate_forward_main_fab);
+        rotateBackwardMainFABAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate_reverse_main_fab);
 
+        hideManualFABAnimation = AnimationUtils.loadAnimation(this, R.anim.hide_manual_fab);
+        showManualFABAnimation = AnimationUtils.loadAnimation(this, R.anim.show_manual_fab);
 
-
-
+        hideAudioFABAnimation = AnimationUtils.loadAnimation(this, R.anim.hide_audio_fab);
+        showAudioFABAnimation = AnimationUtils.loadAnimation(this, R.anim.show_audio_fab);
 
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -145,6 +160,7 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
             case R.id.sign_out:
                 FirebaseAuth fAuth = FirebaseAuth.getInstance();
                 fAuth.signOut();
+                songListviewAdapter.cleanupListener();
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
                 finish();
@@ -216,19 +232,52 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
         dialog.show(fm, "fragment_edit_name");
     }
 
+    private void showAudioFingerprintDialog(){
+        FragmentManager fm = getSupportFragmentManager();
+        dialog = AudioFingerprintDialog.newInstance();
+        dialog.show(fm, "fragment_edit_name");
+    }
+
 
     @Override
     public void onReturnNewSong(Song song) {
         //TODO: deal with new song
-        //add song to list
 
-        songDatabase.addSong(song);
-
-        System.out.println(songDatabase.printDatabase());
-        //add song to DB
-        //add song to firebase
+        addSongToList(song);
         dialog.dismiss();
 
+
+    }
+
+
+    public void addSongToList(final Song song){
+
+        db.getSongListReference().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                // Push the song, it will appear in the list
+                db.getSongListReference().push().setValue(song);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
+    @Override
+    public void onStart(){
+        super.onStart();
+
+        songListviewAdapter = new SongListviewAdapter(this, db.getSongListReference());
+        songListView.setAdapter(songListviewAdapter);
+
+
+        songListView.setLayoutManager(new LinearLayoutManager(this));
 
     }
 

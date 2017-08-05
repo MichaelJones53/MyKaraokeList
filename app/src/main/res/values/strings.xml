@@ -24,4 +24,8 @@
     <string name="lyrics_image">lyricsImage</string>
     <string name="sign_out">Sign Out</string>
     <string name="add_new_song">Add New Song</string>
+
+    <!-- Gracenote keys -->
+    <string name="gnsdk_client_id">535369265</string>
+    <string name="gnsdk_client_tag">676F05084996BE72D7D35F2BAEAD9C4C</string>
 </resources>

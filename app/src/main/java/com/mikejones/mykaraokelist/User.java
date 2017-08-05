@@ -10,7 +10,7 @@ public class User {
 
     private String email;
     private String uid;
-    private ArrayList<Entry> songList = new ArrayList<Entry>();
+    private ArrayList<Song> songList = new ArrayList<Song>();
 
     public User(){
 
@@ -19,6 +19,7 @@ public class User {
     public User(String e, String id){
         email = e;
         uid = id;
+
     }
 
     public String getUid() {
@@ -37,26 +38,26 @@ public class User {
         this.email = email;
     }
 
-    public ArrayList<Entry> getSongList() {
+    public ArrayList<Song> getSongList() {
         return songList;
     }
 
-    public void setSongList(ArrayList<Entry> songList) {
+    public void setSongList(ArrayList<Song> songList) {
         this.songList = songList;
     }
 
 
     public void addSong(Song song){
-        songList.add(new Entry(song));
+        songList.add(song);
     }
 
 
 
-    public void removeSong(Song song){
+    public void removeSong(Song otherSong){
 
-        for(Entry entry: songList){
-            if(entry.getEntry().equals(song)){
-                songList.remove(entry);
+        for(Song song: songList){
+            if(song.equals(otherSong)){
+                songList.remove(song);
             }
         }
 

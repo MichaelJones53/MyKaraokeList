@@ -4,26 +4,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/karaoke_background"
     tools:context="com.mikejones.mykaraokelist.ListActivity">
 
-    <ListView
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/songListView"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+
         app:layout_constraintBottom_toTopOf="@+id/bottomToolBar"
-        android:layout_marginBottom="0dp"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginLeft="0dp" />
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/bottomToolBar"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:background="@color/colorPrimaryDark"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
@@ -31,7 +33,7 @@
         android:id="@+id/mainFloatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         android:clickable="true"
         app:backgroundTint="@color/colorPrimaryDark"
         app:elevation="17dp"
@@ -42,6 +44,14 @@
         app:rippleColor="@color/common_google_signin_btn_text_dark_disabled"
         app:srcCompat="@android:drawable/ic_input_add" />
 
-    <include layout="@layout/fab_layout" />
+    <include
+        android:id="@+id/include"
+        layout="@layout/fab_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/mainFloatingActionButton"
+        app:layout_constraintHorizontal_bias="0.51"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

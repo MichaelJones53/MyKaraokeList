@@ -1,16 +1,19 @@
 package com.mikejones.mykaraokelist;
 
+import java.util.Date;
+
 /**
  * Created by MikeJones on 3/31/17.
  */
 
 public class Song {
 
-    private int id;
+
     private String title;
     private String artist;
     private String lyrics = null;
     private int rating = 0;
+    private Date entered;
 
 
 
@@ -21,11 +24,12 @@ public class Song {
     public Song(String title, String artist){
         this.title = title;
         this.artist = artist;
+        entered = new Date();
     }
 
-    public Song(int id, String title, String artist, String lyrics, int rating){
+    public Song(String title, String artist, String lyrics, int rating){
 
-        this.id = id;
+
         this.title = title;
         this.artist = artist;
         this.lyrics = lyrics;
@@ -52,14 +56,6 @@ public class Song {
         return lyrics;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public void setLyrics(String lyrics) {
         this.lyrics = lyrics;
     }
@@ -67,6 +63,14 @@ public class Song {
     public int getRating()
     {
         return  rating;
+    }
+
+    public Date getEntered() {
+        return entered;
+    }
+
+    public void setEntered(Date entered) {
+        this.entered = entered;
     }
 
     public void setRating(int rating){
@@ -86,9 +90,11 @@ public class Song {
 
     }
 
+    public boolean equals(Song song){
+        return title.equalsIgnoreCase(song.title) && artist.equalsIgnoreCase(song.artist);
+    }
     public String toString(){
-        return "\nID: "+id+ "\n"
-                +"Title: "+title+ "\n"
+        return "\nTitle: "+title+ "\n"
                 +"Artist: "+artist+"\n"
                 +"Lyrics: "+lyrics+"\n"
                 +"rating: "+rating+"\n_";
