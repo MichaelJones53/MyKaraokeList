@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Karaoke List</string>
+    <string name="app_name">Song List</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>

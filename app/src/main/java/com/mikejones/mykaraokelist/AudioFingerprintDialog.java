@@ -106,11 +106,9 @@ public class AudioFingerprintDialog extends DialogFragment{
             GnUserStore userStore = new GnUserStore(getActivity());
             gnUser = new GnUser( userStore, gnsdkClientID, gnsdkClientTag, appString );
             musicIdStream = new GnMusicIdStream(gnUser, GnMusicIdStreamPreset.kPresetMicrophone, new AudioListener());
-//            musicIdStream.options().lookupData(GnLookupData.kLookupDataContent, true);
-//            musicIdStream.options().lookupData(GnLookupData.kLookupDataSonicData, true);
+//          musicIdStream.options().lookupData(GnLookupData.kLookupDataContent, true);
+//          musicIdStream.options().lookupData(GnLookupData.kLookupDataSonicData, true);
             musicIdStream.options().resultSingle( true );
-
-
             musicIdStream.audioProcessStart(new GnMic());
             musicIdStream.identifyAlbumAsync();
 

@@ -42,8 +42,8 @@
                 android:layout_width="70dp"
                 android:layout_height="70dp"
                 android:layout_toRightOf="@+id/deleteImageView"
-                android:padding="15dp"
                 android:background="@drawable/edit_background_rounded"
+                android:padding="15dp"
 
                 app:srcCompat="@android:drawable/ic_menu_edit" />
         </RelativeLayout>
@@ -62,7 +62,8 @@
             android:id="@+id/entryLayout"
             android:layout_width="match_parent"
 
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp">
 
             <ImageButton
                 android:id="@+id/lyrics_button"
@@ -72,7 +73,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
                 android:layout_margin="5dp"
-                android:background="@drawable/scroll"
+                android:background="@drawable/microphone_angled"
                 android:contentDescription="@string/lyrics_image"
                 android:padding="5dp"
                 android:scaleType="fitXY" />
@@ -87,12 +88,14 @@
                 android:layout_alignParentTop="true"
                 android:layout_marginLeft="10dp"
                 android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
                 android:layout_toLeftOf="@+id/lyrics_button"
                 android:layout_toStartOf="@+id/lyrics_button"
-                android:fontFamily="serif"
-                android:padding="5dp"
-                android:text="some really really reall long name"
-                android:textStyle="bold" />
+                android:fontFamily="sans-serif"
+                android:text="some really reall really really really reall long name"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/artistTextView"
@@ -101,13 +104,17 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:layout_below="@+id/songTitleTextView"
+                android:layout_marginBottom="10dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginStart="10dp"
+                android:layout_marginTop="5dp"
                 android:layout_toLeftOf="@+id/lyrics_button"
                 android:layout_toStartOf="@+id/lyrics_button"
-                android:fontFamily="serif"
-                android:padding="5dp"
-                android:text="artist name" />
+                android:fontFamily="sans-serif"
+                android:text="artist name"
+                android:textColor="@color/colorArtistName"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
         </RelativeLayout>
     </FrameLayout>

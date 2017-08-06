@@ -1,5 +1,7 @@
 package com.mikejones.mykaraokelist;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -46,6 +48,7 @@ public class UpdateSongDialog extends DialogFragment {
                              Bundle savedInstanceState) {
 
 
+        getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         return inflater.inflate(R.layout.add_song_dialog_layout, container);
 
     }

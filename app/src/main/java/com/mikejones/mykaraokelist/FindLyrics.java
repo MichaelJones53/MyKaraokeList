@@ -9,6 +9,7 @@ import android.util.Log;
  */
 
 public class FindLyrics extends AsyncTask<String, Void, String> {
+    public static final String TAG = "FindLyrics";
     private String artist;
     private String songName;
     private String lyrics = null;
@@ -20,9 +21,11 @@ public class FindLyrics extends AsyncTask<String, Void, String> {
     }
     @Override
     protected String doInBackground(String... params) {
-        artist = params[0];
-        songName = params[1];
-        lyrics = AZLyrics.fromMetaData(artist, songName);
+        songName = params[0];
+        artist = params[1];
+
+        Log.d(TAG, "artist: "+artist+"  title: "+songName);
+        lyrics = AZLyrics.fromMetaData(songName, artist);
         return lyrics;
     }
 
@@ -32,7 +35,10 @@ public class FindLyrics extends AsyncTask<String, Void, String> {
 
         AddSongDialog.AddSongDialogListener activity = (AddSongDialog.AddSongDialogListener) this.activity;
         Song song = new Song(songName, artist);
-        song.setLyrics(lyrics+"");
+
+        song.setLyrics(lyrics);
+
+
         Log.d("AddSongDialog", lyrics+"");
         activity.onReturnNewSong(song);
 

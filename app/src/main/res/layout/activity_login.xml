@@ -61,16 +61,30 @@
 
             </android.support.design.widget.TextInputLayout>
 
-            <Button
-                android:id="@+id/email_sign_in_button"
-                style="?android:textAppearanceSmall"
+            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/RelativeLayout01"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:background="@android:color/transparent"
-                android:text="@string/action_sign_in"
-                android:textColor="@color/colorPrimaryDark"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/email_sign_in_button"
+                    style="?android:textAppearanceSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/button_states"
+                    android:elevation="7dp"
+                    android:minHeight="40dp"
+                    android:paddingEnd="40dp"
+                    android:paddingStart="40dp"
+                    android:text="@string/action_sign_in"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
                 android:textStyle="bold" />
+
+            </RelativeLayout>
+
 
             <Button
                 android:id="@+id/newAccountButton"
@@ -80,6 +94,7 @@
                 android:background="@android:color/transparent"
                 android:text="@string/register_new_account"
                 android:textColor="@android:color/background_dark" />
+
 
             <TextView
                 android:id="@+id/resetPasswordTextView"

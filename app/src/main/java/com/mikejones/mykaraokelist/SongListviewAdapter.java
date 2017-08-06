@@ -172,6 +172,14 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
         holder.songTitleTextView.setText(song.getTitle());
         holder.artistTextView.setText(song.getArtist());
 
+        if(song.getLyrics() == null){
+            Log.d(TAG, song.getTitle()+" is null");
+            holder.lyricsButton.setVisibility(View.INVISIBLE);
+            holder.lyricsButton.setEnabled(false);
+        }else{
+            holder.lyricsButton.setVisibility(View.VISIBLE);
+            holder.lyricsButton.setEnabled(true);
+        }
 
 
         holder.lyricsButton.setOnClickListener(new View.OnClickListener() {
@@ -189,27 +197,26 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
             @Override
             public void onClick(View v) {
 
-                if(holder.swipeLayout.isOpened()) {
+
+
                     System.out.println("idList: "+idList.size()+  "   position: "+position);
-//                    idList.remove(position);
-//                    songList.remove(position);
                     databaseRef.child(idList.get(position)).removeValue();
                     notifyItemRemoved(position);
 
 
 
 
-                }
+
             }
         });
 
         holder.editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(holder.swipeLayout.isOpened()) {
+
                     showUpdateSongDialog(idList.get(position));
                     holder.swipeLayout.close(true);
-                }
+
             }
         });
 
@@ -243,7 +250,6 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
     {
         public static final String TAG = "SongViewHolder";
         private SwipeRevealLayout swipeLayout;
-        private View deleteLayout;
 
         TextView songTitleTextView;
         TextView artistTextView;
@@ -257,8 +263,28 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
             Log.d(TAG, "constructor called");
 
             swipeLayout = (SwipeRevealLayout) itemView.findViewById(R.id.swipe_layout);
-            deleteLayout = itemView.findViewById(R.id.delete_layout);
 
+
+            swipeLayout.setSwipeListener(new SwipeRevealLayout.SwipeListener() {
+                @Override
+                public void onClosed(SwipeRevealLayout view) {
+                    deleteButton.setEnabled(false);
+                    editButton.setEnabled(false);
+                }
+
+                @Override
+                public void onOpened(SwipeRevealLayout view) {
+
+                    deleteButton.setEnabled(true);
+                    editButton.setEnabled(true);
+                }
+
+                @Override
+                public void onSlide(SwipeRevealLayout view, float slideOffset) {
+                    deleteButton.setEnabled(false);
+                    editButton.setEnabled(false);
+                }
+            });
 
             songTitleTextView = (TextView) itemView.findViewById(R.id.songTitleTextView);
             artistTextView = (TextView) itemView.findViewById(R.id.artistTextView);
@@ -266,6 +292,9 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
 
             editButton = (ImageView) itemView.findViewById(R.id.editImageView);
             deleteButton = (ImageView) itemView.findViewById(R.id.deleteImageView);
+
+            deleteButton.setEnabled(false);
+            editButton.setEnabled(false);
 
 
         }
@@ -299,8 +328,7 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
         protected void onPostExecute(String lyrics) {
             // TODO: do something with the feed
 
-            Song song = new Song(artist, songName);
-            System.out.println("lyrics: "+lyrics);
+            Song song = new Song(songName, artist);
             song.setLyrics(lyrics);
             databaseRef.child(key).setValue(song).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
