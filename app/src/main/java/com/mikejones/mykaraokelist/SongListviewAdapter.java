@@ -8,10 +8,13 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -182,6 +185,8 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
         }
 
 
+
+
         holder.lyricsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -257,6 +262,7 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
         ImageView editButton;
         ImageView deleteButton;
 
+
         public SongViewHolder(View itemView) {
             super(itemView);
 
@@ -292,6 +298,7 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
 
             editButton = (ImageView) itemView.findViewById(R.id.editImageView);
             deleteButton = (ImageView) itemView.findViewById(R.id.deleteImageView);
+
 
             deleteButton.setEnabled(false);
             editButton.setEnabled(false);

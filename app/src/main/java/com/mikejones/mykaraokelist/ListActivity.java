@@ -282,5 +282,4 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
     }
 
 
-
 }

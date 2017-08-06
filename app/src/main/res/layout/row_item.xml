@@ -63,20 +63,23 @@
             android:layout_width="match_parent"
 
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp">
+            android:layout_marginLeft="10dp">
+
 
             <ImageButton
                 android:id="@+id/lyrics_button"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
+
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="10dp"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:layout_margin="5dp"
                 android:background="@drawable/microphone_angled"
                 android:contentDescription="@string/lyrics_image"
                 android:padding="5dp"
                 android:scaleType="fitXY" />
+
 
 
             <TextView
@@ -115,6 +118,8 @@
                 android:textColor="@color/colorArtistName"
                 android:textSize="18sp"
                 android:textStyle="bold" />
+
+
 
         </RelativeLayout>
     </FrameLayout>
