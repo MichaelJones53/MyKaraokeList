@@ -1,12 +1,14 @@
 package com.mikejones.mykaraokelist;
 
 
+import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +29,7 @@ public class AddSongDialog extends DialogFragment {
     private EditText artistNameTextview;
     private Button cancelButton;
     private Button okButton;
+    private static boolean isSongProvided = false;
 
 //TODO: add spinner during website scape for lyrics.  seems fast enough currently that i dont need to bother right now
 
@@ -38,6 +41,18 @@ public class AddSongDialog extends DialogFragment {
     public static AddSongDialog newInstance(){
         AddSongDialog dialog = new AddSongDialog();
         dialog.setCancelable(false);
+        return dialog;
+
+    }
+
+    public static AddSongDialog newInstanceWithSong(String title, String artist){
+        isSongProvided = true;
+        AddSongDialog dialog = new AddSongDialog();
+        Bundle args = new Bundle();
+        args.putString("TITLE", title);
+        args.putString("ARTIST", artist);
+        dialog.setCancelable(false);
+        dialog.setArguments(args);
         return dialog;
 
     }
@@ -58,6 +73,15 @@ public class AddSongDialog extends DialogFragment {
         artistNameTextview = (EditText) view.findViewById(R.id.artist_name_textview);
         cancelButton = (Button) view.findViewById(R.id.cancel_button);
         okButton = (Button) view.findViewById(R.id.add_button);
+
+        Bundle args = this.getArguments();
+
+        if(args != null){
+            if(isSongProvided){
+                songTitleTextview.setText(args.getString("TITLE"));
+                artistNameTextview.setText(args.getString("ARTIST"));
+            }
+        }
 
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
@@ -83,7 +107,7 @@ public class AddSongDialog extends DialogFragment {
                 }else{
 
 
-                    FindLyrics findLyrics = new FindLyrics(getActivity());
+                    FindLyrics findLyrics = new FindLyrics(getActivity(), new ProgressDialog(getContext()));
                     findLyrics.execute(songTitle, artistName);
                 }
             }

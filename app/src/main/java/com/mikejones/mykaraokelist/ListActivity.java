@@ -2,11 +2,15 @@ package com.mikejones.mykaraokelist;
 
 
 
+import android.Manifest;
 import android.content.Intent;
 
 
-import android.graphics.Color;
+import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 
@@ -16,7 +20,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,7 +31,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import android.widget.FrameLayout;
-
+import android.widget.TextView;
 
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -34,9 +40,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 
-public class ListActivity extends AppCompatActivity implements AddSongDialog.AddSongDialogListener{
+import static android.view.View.TEXT_ALIGNMENT_CENTER;
+
+
+
+public class ListActivity extends AppCompatActivity implements AddSongDialog.AddSongDialogListener, AudioFingerprintDialog.AddAudioSongDialogListener{
     public static final String TAG = "ListActivity";
-    public static final int ITEM_SPACING = 40;
+    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
 
     private RecyclerView songListView;
     private SongListviewAdapter songListviewAdapter;
@@ -53,10 +63,10 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
     private DialogFragment dialog;
     private FirebaseManger db;
 
-
-
-
     private boolean buttonsShown = false;
+
+
+    private boolean permissionToRecordAccepted = false;
 
 
     @Override
@@ -67,6 +77,10 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
         initalizeDatabase();
         initalizeAnimations();
         initalizeViews();
+
+
+         String [] permissions = {Manifest.permission.RECORD_AUDIO};
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
 
     }
@@ -85,6 +99,9 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
         mainFAB = (FloatingActionButton) findViewById(R.id.mainFloatingActionButton);
         manualEntryFAB = (FloatingActionButton) findViewById(R.id.manualEntryFAB);
         audioEntryFAB = (FloatingActionButton) findViewById(R.id.audioEntryFAB);
+
+        manualEntryFAB.setVisibility(View.INVISIBLE);
+        audioEntryFAB.setVisibility(View.INVISIBLE);
 
 
         mainFAB.setOnClickListener(new View.OnClickListener() {
@@ -125,6 +142,13 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
             public void onClick(View v) {
 
                 showAudioFingerprintDialog();
+                if(buttonsShown){
+
+                    hideFABs();
+                    mainFAB.startAnimation(rotateBackwardMainFABAnimation);
+                    buttonsShown = false;
+                }
+
 
 
             }
@@ -232,16 +256,44 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
         dialog.show(fm, "fragment_edit_name");
     }
 
+    public void showNewSongDialogWithSong(String title, String artist) {
+        dialog.dismiss();
+
+        FragmentManager fm = getSupportFragmentManager();
+        dialog = AddSongDialog.newInstanceWithSong(title, artist);
+        dialog.show(fm, "fragment_edit_name");
+    }
+
     private void showAudioFingerprintDialog(){
         FragmentManager fm = getSupportFragmentManager();
         dialog = AudioFingerprintDialog.newInstance();
         dialog.show(fm, "fragment_edit_name");
+
     }
 
+    @Override
+    public void onReturnNewAudioSong(String title, String artist) {
+        Log.d(TAG, "onReturnNewAudioSong called");
+        showNewSongDialogWithSong(title, artist);
+    }
+
+    @Override
+    public void onReturnNoMatchFound() {
+        Log.d(TAG, "onReturnNoMatchFound called");
+        dialog.dismiss();
+
+        Snackbar message = Snackbar.make(findViewById(R.id.constLayout), "Unable To Identify Song", Snackbar.LENGTH_SHORT);
+        message.show();
+
+
+
+    }
 
     @Override
     public void onReturnNewSong(Song song) {
         //TODO: deal with new song
+
+        Log.d(TAG, "onReturnNewSong called");
 
         addSongToList(song);
         dialog.dismiss();
@@ -257,7 +309,7 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 // Push the song, it will appear in the list
-                db.getSongListReference().push().setValue(song);
+                db.addSong(song);
 
             }
 
@@ -276,10 +328,25 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
         songListviewAdapter = new SongListviewAdapter(this, db.getSongListReference());
         songListView.setAdapter(songListviewAdapter);
 
-
+        ItemTouchHelper.Callback helper = new SimpleItemTouchHelperCallback(songListviewAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(helper);
+        touchHelper.attachToRecyclerView(songListView);
         songListView.setLayoutManager(new LinearLayoutManager(this));
 
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case REQUEST_RECORD_AUDIO_PERMISSION:
+                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                break;
+        }
+        if (!permissionToRecordAccepted ) finish();
+
+    }
+
 
 
 }

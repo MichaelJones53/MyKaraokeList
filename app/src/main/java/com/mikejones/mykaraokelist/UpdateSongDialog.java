@@ -1,5 +1,6 @@
 package com.mikejones.mykaraokelist;
 
+import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -83,8 +84,9 @@ public class UpdateSongDialog extends DialogFragment {
                 } else if(artistName.equals("")){
                     Toast.makeText(getActivity(), "artist is empty", Toast.LENGTH_SHORT).show();
                 }else{
-                    SongListviewAdapter.UpdateEntry updateEntry = new SongListviewAdapter.UpdateEntry();
+                    SongListviewAdapter.UpdateEntry updateEntry = new SongListviewAdapter.UpdateEntry(new ProgressDialog(getContext()));
                     updateEntry.execute(key, artistName, songTitle);
+                    getDialog().dismiss();
                 }
             }
         });

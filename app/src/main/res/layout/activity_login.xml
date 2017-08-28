@@ -108,11 +108,11 @@
             <ImageView
                 android:id="@+id/imageView"
                 android:layout_width="wrap_content"
-                android:layout_height="308dp"
+                android:layout_height="match_parent"
                 android:contentDescription="@string/karaoke_image"
                 android:elevation="0dp"
-                app:srcCompat="@drawable/karaoke_background"
-                android:layout_weight="0.05" />
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/man_singing" />
 
         </LinearLayout>
 

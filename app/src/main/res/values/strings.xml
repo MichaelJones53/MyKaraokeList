@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Song List</string>
+    <string name="app_name">My Karaoke List</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -24,6 +24,8 @@
     <string name="lyrics_image">lyricsImage</string>
     <string name="sign_out">Sign Out</string>
     <string name="add_new_song">Add New Song</string>
+    <string name="loading_account">Loading Account...</string>
+    <string name="resetting_password">Reseting Password...</string>
 
     <!-- Gracenote keys -->
     <string name="gnsdk_client_id">535369265</string>

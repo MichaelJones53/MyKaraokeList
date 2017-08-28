@@ -1,5 +1,7 @@
 package com.mikejones.mykaraokelist;
 
+import android.util.Log;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -12,6 +14,7 @@ import java.util.ArrayList;
  */
 
 public class FirebaseManger {
+    public static final String TAG = "FirebaseManager";
 
     private DatabaseReference firebaseDatabase;
     private DatabaseReference songlistReference;
@@ -38,6 +41,7 @@ public class FirebaseManger {
     public void addSong(Song song){
         songlistReference.push().setValue(song);
 
+
     }
 
     public void removeSong(String ref){
@@ -48,6 +52,12 @@ public class FirebaseManger {
     public void writeNewUser(User user){
 
         firebaseDatabase.child("users").child(user.getUid()).setValue(user);
+
+    }
+
+    public void setSongIndex(String ref, int index){
+        Log.d(TAG, "setting index value");
+        songlistReference.child(ref).child("index").setValue(index);
 
     }
 

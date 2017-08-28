@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 
 import android.support.annotation.NonNull;
@@ -34,6 +35,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
@@ -57,7 +59,7 @@ public class LoginActivity extends AppCompatActivity {
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private TextView mResetPasswordTextView;
-    private View mProgressView;
+    private ProgressDialog mProgressView;
     private View mLoginFormView;
     private Button mCreateNewAccountButton;
     private Button mEmailSignInButton;
@@ -70,10 +72,10 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         mLoginFormView = findViewById(R.id.email_login_form);
-        mProgressView = findViewById(R.id.login_progress);
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
         db = new FirebaseManger();
+        mProgressView = new ProgressDialog(this);
 
 
         // Set up the login form.
@@ -120,7 +122,7 @@ public class LoginActivity extends AppCompatActivity {
                     focusView.requestFocus();
 
                 }else {
-                    showProgress(true);
+                    showProgress(getString(R.string.resetting_password));
 
                     FirebaseAuth.getInstance().sendPasswordResetEmail(email)
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -131,12 +133,12 @@ public class LoginActivity extends AppCompatActivity {
                                         inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                                         Log.d(TAG, mEmailView.getText().toString() + " : Email sent.");
                                         Toast.makeText(getApplicationContext(), "Email sent to " + mEmailView.getText().toString(), Toast.LENGTH_SHORT).show();
-                                        showProgress(false);
                                     } else {
                                         Log.d(TAG, getString(R.string.email_does_not_exist) + " : " + mEmailView.getText().toString());
                                         mEmailView.setError(getString(R.string.email_does_not_exist));
-                                        showProgress(false);
+
                                     }
+                                    mProgressView.dismiss();
                                 }
                             });
                 }
@@ -162,7 +164,7 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                     Intent intent = new Intent(LoginActivity.this, com.mikejones.mykaraokelist.ListActivity.class);
                     LoginActivity.this.startActivity(intent);
-                    showProgress(false);
+                    mProgressView.dismiss();
                     finish();
                 } else {
                     // User is signed out
@@ -173,7 +175,7 @@ public class LoginActivity extends AppCompatActivity {
         // [END auth_state_listener]
 
         if (mFirebaseUser != null) {
-            showProgress(false);
+            mProgressView.dismiss();
             Intent intent = new Intent(this, com.mikejones.mykaraokelist.ListActivity.class);
             startActivity(intent);
             finish();
@@ -235,7 +237,7 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true);
+            showProgress(getString(R.string.loading_account));
             mAuthTask = new UserLoginTask(email, password, isNewAccount);
             mAuthTask.execute((Void) null);
         }
@@ -273,37 +275,12 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * Shows the progress UI and hides the login form.
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+    private void showProgress(String message) {
+        mProgressView.setMessage(message);
+        mProgressView.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mProgressView.setCancelable(false);
+        mProgressView.show();
     }
 
 
@@ -364,10 +341,14 @@ public class LoginActivity extends AppCompatActivity {
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
-                        if (task.getException() instanceof FirebaseAuthInvalidUserException) {
+                        if (task.getException() instanceof FirebaseAuthInvalidUserException ||
+                                task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
                             Toast.makeText(LoginActivity.this, "Invalid Account Information!", Toast.LENGTH_SHORT).show();
-
+                        }else if(task.getException() != null){
+                            Toast.makeText(LoginActivity.this, "Something went wrong...  ", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "signInWithEmailAndPassword failed: " + task.getException());
                         }
+                        mProgressView.dismiss();
                     }
                 });
             }
@@ -385,12 +366,13 @@ public class LoginActivity extends AppCompatActivity {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
             }
+
         }
 
         @Override
         protected void onCancelled() {
             mAuthTask = null;
-            showProgress(false);
+            mProgressView.dismiss();
         }
 
 

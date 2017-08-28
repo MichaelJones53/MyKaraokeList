@@ -1,5 +1,6 @@
 package com.mikejones.mykaraokelist;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.icu.lang.UScript;
 import android.os.AsyncTask;
@@ -32,9 +33,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.Query;
 
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +46,7 @@ import java.util.Map;
  * Created by MikeJones on 7/23/17.
  */
 
-public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapter.SongViewHolder>{
+public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapter.SongViewHolder> implements ItemTouchHelperAdapter{
 
     public static final String TAG = "SongListViewAdapter";
 
@@ -56,25 +59,33 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
 
     private List<String> idList = new ArrayList<>();
     private List<Song> songList = new ArrayList<>();
+    private boolean skipUpdate = false;
+    private int index = 0;
 
     public SongListviewAdapter(@NonNull final Context context, DatabaseReference ref) {
 
         Log.d(TAG, "constructor called");
         this.context = context;
         databaseRef = ref;
-
+        final boolean isMoved = false;
 
         childEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
-                Log.d(TAG, "onChildAdded called: "+ dataSnapshot.getKey());
+                Log.d(TAG, "onChildAdded called: "+ dataSnapshot.getKey()+"    value: "+dataSnapshot.getPriority());
 
-                    Song newSong = dataSnapshot.getValue(Song.class);
+                Song newSong = dataSnapshot.getValue(Song.class);
 
-                    songList.add(newSong);
-                    idList.add(dataSnapshot.getKey());
+                songList.add(newSong);
+                idList.add(dataSnapshot.getKey());
 
+
+                Map<String, Object> childUpdates = new HashMap<>();
+                childUpdates.put(dataSnapshot.getKey()+"/index", index);
+                databaseRef.updateChildren(childUpdates);
+
+                index++;
 
                 notifyItemInserted(songList.size()-1);
             }
@@ -91,18 +102,22 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
                 Song newSong = dataSnapshot.getValue(Song.class);
                 String songKey = dataSnapshot.getKey();
 
-                // [START_EXCLUDE]
-                int songIndex = idList.indexOf(songKey);
-                if (songIndex > -1) {
-                    // Replace with the new data
-                    songList.set(songIndex, newSong);
+                if(!skipUpdate) {
+                    // [START_EXCLUDE]
+                    int songIndex = idList.indexOf(songKey);
+                    if (songIndex > -1) {
+                        // Replace with the new data
+                        songList.set(songIndex, newSong);
 
-                    // Update the RecyclerView
-                    notifyItemChanged(songIndex);
-                } else {
-                    Log.w(TAG, "onChildChanged:unknown_child:" + songKey);
+                        // Update the RecyclerView
+
+                        notifyItemChanged(songIndex);
+
+                    } else {
+                        Log.w(TAG, "onChildChanged:unknown_child:" + songKey);
+                    }
+                    // [END_EXCLUDE]
                 }
-                // [END_EXCLUDE]
             }
 
             @Override
@@ -133,13 +148,33 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                // A song has changed position, use the key to determine if we are
-                // displaying this comment and if so move it.
+                skipUpdate = true;
                 Song movedSong = dataSnapshot.getValue(Song.class);
                 String songKey = dataSnapshot.getKey();
+                Log.w(TAG, "onChildMoved:" + songKey);
+                // A song has changed position, use the key to determine if we are
+                // displaying this comment and if so move it.
+                int indexA = idList.indexOf(dataSnapshot.getKey());
+                int indexB = idList.indexOf(s);
+
+                Log.d(TAG, "indexA: "+ indexA+ "   Key: "+dataSnapshot.getKey());
+                Log.d(TAG, "indexB: "+ indexA+ "   Key: "+s);
+
+                if(indexB == -1){
+
+
+                }else{
+
+                    Collections.swap(idList, indexA, indexB);
+                    Collections.swap(songList, indexA, indexB);
+                }
+
 
                 // ...
+
+
+
+
             }
 
             @Override
@@ -151,7 +186,8 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
             }
         };
 
-        ref.addChildEventListener(childEventListener);
+        Query items = databaseRef.orderByChild("index");
+        items.addChildEventListener(childEventListener);
 
 
 
@@ -251,6 +287,46 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
 
 
 
+    @Override
+    public void onItemMove(int fromPosition, int toPosition) {
+
+        Log.d(TAG, "initial onItemMove called: from: "+fromPosition+"  toPosition"+toPosition);
+
+        databaseRef.child(idList.get(fromPosition)).child("index").setValue(toPosition);
+        databaseRef.child(idList.get(toPosition)).child("index").setValue(fromPosition);
+
+//        if (fromPosition < toPosition) {
+//            for (int i = fromPosition; i < toPosition; i++) {
+//
+//
+//
+//                Collections.swap(idList, i, i + 1);
+//                Collections.swap(songList, i, i + 1);
+//
+//            }
+//        } else {
+//            for (int i = fromPosition; i > toPosition; i--) {
+//
+//                Collections.swap(idList, i, i - 1);
+//                Collections.swap(songList, i, i - 1);
+//            }
+//        }
+        notifyItemMoved(fromPosition, toPosition);
+
+    }
+
+    @Override
+    public void onItemDismiss(int position) {
+
+    }
+
+
+
+
+
+
+
+
     public static class SongViewHolder extends RecyclerView.ViewHolder
     {
         public static final String TAG = "SongViewHolder";
@@ -316,6 +392,15 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
         private String songName;
         private String lyrics = null;
         private String key;
+        private ProgressDialog loadingDialog;
+
+        public UpdateEntry(ProgressDialog dialog){
+            loadingDialog = dialog;
+            loadingDialog.setCancelable(false);
+            loadingDialog.setMessage("Searching for lyrics");
+            loadingDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            loadingDialog.show();
+        }
 
 
 
@@ -335,14 +420,18 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
         protected void onPostExecute(String lyrics) {
             // TODO: do something with the feed
 
+
             Song song = new Song(songName, artist);
             song.setLyrics(lyrics);
+            loadingDialog.dismiss();
             databaseRef.child(key).setValue(song).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     dialog.dismiss();
                 }
             });
+
+
 
 
         }
