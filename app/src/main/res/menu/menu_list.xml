@@ -4,8 +4,6 @@
     tools:context="com.mikejones.mykaraokelist.ListActivity">
     <item
         android:id="@+id/sign_out"
-        android:icon="@drawable/sign_out_icon"
-        android:orderInCategory="100"
         android:title="@string/sign_out"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 </menu>

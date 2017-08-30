@@ -90,6 +90,8 @@ public class Song {
 
     }
 
+
+
     public boolean equals(Song song){
         return title.equalsIgnoreCase(song.title) && artist.equalsIgnoreCase(song.artist);
     }

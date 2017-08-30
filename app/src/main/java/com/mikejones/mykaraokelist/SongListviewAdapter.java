@@ -11,7 +11,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
+
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
@@ -34,8 +34,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.net.URLDecoder;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,7 +48,7 @@ import java.util.Map;
  * Created by MikeJones on 7/23/17.
  */
 
-public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapter.SongViewHolder> implements ItemTouchHelperAdapter{
+public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapter.SongViewHolder> implements ItemTouchHelperAdapter {
 
     public static final String TAG = "SongListViewAdapter";
 
@@ -56,53 +58,51 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
     private final ViewBinderHelper viewBinderHelper = new ViewBinderHelper();
     private static DialogFragment dialog;
 
+    private static boolean isUpdate = false;
 
     private List<String> idList = new ArrayList<>();
     private List<Song> songList = new ArrayList<>();
-    private boolean skipUpdate = false;
-    private int index = 0;
+
+
+    private int called = 0;
+
 
     public SongListviewAdapter(@NonNull final Context context, DatabaseReference ref) {
 
         Log.d(TAG, "constructor called");
         this.context = context;
         databaseRef = ref;
-        final boolean isMoved = false;
+
+
 
         childEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
-                Log.d(TAG, "onChildAdded called: "+ dataSnapshot.getKey()+"    value: "+dataSnapshot.getPriority());
+                Log.d(TAG, "onChildAdded called: " + dataSnapshot.getKey() + "    value: " + dataSnapshot.getPriority());
 
                 Song newSong = dataSnapshot.getValue(Song.class);
+
 
                 songList.add(newSong);
                 idList.add(dataSnapshot.getKey());
 
-
-                Map<String, Object> childUpdates = new HashMap<>();
-                childUpdates.put(dataSnapshot.getKey()+"/index", index);
-                databaseRef.updateChildren(childUpdates);
-
-                index++;
-
-                notifyItemInserted(songList.size()-1);
+                notifyItemInserted(songList.size() - 1);
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
 
-
                 Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
+                Log.d(TAG, "onChildChanged other string:" + s);
 
                 // A song has been changed, use the key to determine if we are displaying this
                 // song and if so display the changed song.
                 Song newSong = dataSnapshot.getValue(Song.class);
                 String songKey = dataSnapshot.getKey();
 
-                if(!skipUpdate) {
+                if (isUpdate) {
                     // [START_EXCLUDE]
                     int songIndex = idList.indexOf(songKey);
                     if (songIndex > -1) {
@@ -111,12 +111,15 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
 
                         // Update the RecyclerView
 
+
                         notifyItemChanged(songIndex);
+
 
                     } else {
                         Log.w(TAG, "onChildChanged:unknown_child:" + songKey);
+
+                        // [END_EXCLUDE]
                     }
-                    // [END_EXCLUDE]
                 }
             }
 
@@ -139,7 +142,7 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
 
                     // Update the RecyclerView
                     notifyItemRemoved(songIndex);
-                    notifyItemRangeChanged(songIndex, getItemCount()-songIndex);
+                    notifyItemRangeChanged(songIndex, getItemCount() - songIndex);
                 } else {
                     Log.w(TAG, "onChildRemoved:unknown_child:" + songKey);
                 }
@@ -148,32 +151,8 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                skipUpdate = true;
-                Song movedSong = dataSnapshot.getValue(Song.class);
-                String songKey = dataSnapshot.getKey();
-                Log.w(TAG, "onChildMoved:" + songKey);
-                // A song has changed position, use the key to determine if we are
-                // displaying this comment and if so move it.
-                int indexA = idList.indexOf(dataSnapshot.getKey());
-                int indexB = idList.indexOf(s);
 
-                Log.d(TAG, "indexA: "+ indexA+ "   Key: "+dataSnapshot.getKey());
-                Log.d(TAG, "indexB: "+ indexA+ "   Key: "+s);
-
-                if(indexB == -1){
-
-
-                }else{
-
-                    Collections.swap(idList, indexA, indexB);
-                    Collections.swap(songList, indexA, indexB);
-                }
-
-
-                // ...
-
-
-
+                Log.w(TAG, "onChildMoved:" + dataSnapshot.getKey());
 
             }
 
@@ -186,9 +165,7 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
             }
         };
 
-        Query items = databaseRef.orderByChild("index");
-        items.addChildEventListener(childEventListener);
-
+        databaseRef.addChildEventListener(childEventListener);
 
 
     }
@@ -200,27 +177,27 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
         Log.d(TAG, "onCreateView called");
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.row_item, parent, false);
+
         return new SongViewHolder(view);
+
     }
 
     @Override
-    public void onBindViewHolder(final SongViewHolder holder, final int position) {
+    public void onBindViewHolder(final SongViewHolder holder, int position) {
 
-        Log.d(TAG, "onBindViewHolder called.  position: " +position);
+        Log.d(TAG, "onBindViewHolder called.  position: " + position);
         final Song song = songList.get(position);
         holder.songTitleTextView.setText(song.getTitle());
         holder.artistTextView.setText(song.getArtist());
 
-        if(song.getLyrics() == null){
-            Log.d(TAG, song.getTitle()+" is null");
+        if (song.getLyrics() == null) {
+            Log.d(TAG, song.getTitle() + " is null");
             holder.lyricsButton.setVisibility(View.INVISIBLE);
             holder.lyricsButton.setEnabled(false);
-        }else{
+        } else {
             holder.lyricsButton.setVisibility(View.VISIBLE);
             holder.lyricsButton.setEnabled(true);
         }
-
-
 
 
         holder.lyricsButton.setOnClickListener(new View.OnClickListener() {
@@ -234,19 +211,15 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
             }
         });
 
+
         holder.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-
-
-                    System.out.println("idList: "+idList.size()+  "   position: "+position);
-                    databaseRef.child(idList.get(position)).removeValue();
-                    notifyItemRemoved(position);
-
-
-
-
+                System.out.println("idList: " + idList.size() + "   position: " + holder.getAdapterPosition());
+                databaseRef.child(idList.get(holder.getAdapterPosition())).removeValue();
+                holder.swipeLayout.close(true);
+                notifyItemRemoved(holder.getAdapterPosition());
 
             }
         });
@@ -255,8 +228,8 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
             @Override
             public void onClick(View v) {
 
-                    showUpdateSongDialog(idList.get(position));
-                    holder.swipeLayout.close(true);
+                showUpdateSongDialog(idList.get(holder.getAdapterPosition()));
+                holder.swipeLayout.close(true);
 
             }
         });
@@ -267,8 +240,9 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
     @Override
     public int getItemCount() {
         Log.d(TAG, "getItemCount called");
-        return songList.size();
+        return idList.size();
     }
+
 
     public void cleanupListener() {
         if (childEventListener != null) {
@@ -277,43 +251,41 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
     }
 
 
-
-
     private void showUpdateSongDialog(String key) {
-        FragmentManager fm = ((FragmentActivity)context).getSupportFragmentManager();
+        FragmentManager fm = ((FragmentActivity) context).getSupportFragmentManager();
         dialog = UpdateSongDialog.newInstance(key);
         dialog.show(fm, "fragment_edit_name");
     }
 
 
-
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
 
-        Log.d(TAG, "initial onItemMove called: from: "+fromPosition+"  toPosition"+toPosition);
 
-        databaseRef.child(idList.get(fromPosition)).child("index").setValue(toPosition);
-        databaseRef.child(idList.get(toPosition)).child("index").setValue(fromPosition);
+        Log.d(TAG, "initial onItemMove called: from: " + fromPosition + "  toPosition: " + toPosition);
 
-//        if (fromPosition < toPosition) {
-//            for (int i = fromPosition; i < toPosition; i++) {
-//
-//
-//
-//                Collections.swap(idList, i, i + 1);
-//                Collections.swap(songList, i, i + 1);
-//
-//            }
-//        } else {
-//            for (int i = fromPosition; i > toPosition; i--) {
-//
-//                Collections.swap(idList, i, i - 1);
-//                Collections.swap(songList, i, i - 1);
-//            }
-//        }
+
+
+        Map<String, Object> childUpdates = new HashMap<>();
+
+        childUpdates.put(idList.get(toPosition), songList.get(fromPosition));
+        called++;
+        System.out.println("CALLED: "+called);
+
+
+        childUpdates.put(idList.get(fromPosition), songList.get(toPosition));
+        childUpdates.put(idList.get(toPosition), songList.get(fromPosition));
+        System.out.println("putting "+songList.get(fromPosition).getTitle()+"   into "+fromPosition);
+        System.out.println("putting "+songList.get(toPosition).getTitle()+"   into "+toPosition);
+
+        Collections.swap(songList, fromPosition, toPosition);
+
+        databaseRef.updateChildren(childUpdates);
+
         notifyItemMoved(fromPosition, toPosition);
 
     }
+
 
     @Override
     public void onItemDismiss(int position) {
@@ -321,14 +293,7 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
     }
 
 
-
-
-
-
-
-
-    public static class SongViewHolder extends RecyclerView.ViewHolder
-    {
+    public static class SongViewHolder extends RecyclerView.ViewHolder {
         public static final String TAG = "SongViewHolder";
         private SwipeRevealLayout swipeLayout;
 
@@ -385,7 +350,7 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
     }
 
 
-    public static class UpdateEntry extends AsyncTask<String, Void, String>{
+    public static class UpdateEntry extends AsyncTask<String, Void, String> {
 
 
         private String artist;
@@ -394,7 +359,7 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
         private String key;
         private ProgressDialog loadingDialog;
 
-        public UpdateEntry(ProgressDialog dialog){
+        public UpdateEntry(ProgressDialog dialog) {
             loadingDialog = dialog;
             loadingDialog.setCancelable(false);
             loadingDialog.setMessage("Searching for lyrics");
@@ -403,14 +368,13 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
         }
 
 
-
         @Override
         protected String doInBackground(String... params) {
             key = params[0];
             artist = params[1];
             songName = params[2];
 
-            System.out.print("key: "+key+ "   artist: "+artist+"  title: "+songName);
+            System.out.print("key: " + key + "   artist: " + artist + "  title: " + songName);
             lyrics = AZLyrics.fromMetaData(songName, artist);
 
             return lyrics;
@@ -424,14 +388,14 @@ public class SongListviewAdapter extends RecyclerView.Adapter<SongListviewAdapte
             Song song = new Song(songName, artist);
             song.setLyrics(lyrics);
             loadingDialog.dismiss();
+            isUpdate = true;
             databaseRef.child(key).setValue(song).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
+                    isUpdate = false;
                     dialog.dismiss();
                 }
             });
-
-
 
 
         }

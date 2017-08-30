@@ -38,7 +38,7 @@ public class AZLyrics extends AsyncTask<String, Void, String> {
                 "http://www.azlyrics.com/lyrics/%s/%s.html",
                 htmlSong.toLowerCase(Locale.getDefault()),
                 htmlArtist.toLowerCase(Locale.getDefault()));
-        Log.d(TAG, "URL string is: "+urlString);
+      //  Log.d(TAG, "URL string is: "+urlString);
         return fromURL(urlString, htmlArtist, htmlSong);
     }
 
@@ -48,19 +48,19 @@ public class AZLyrics extends AsyncTask<String, Void, String> {
             Document document = Jsoup.connect(url).userAgent(Net.USER_AGENT).get();
             if (document.location().contains("azlyrics")) {
                 html = document.html();
-                Log.d(TAG, "html set "+html.toString());
+         //       Log.d(TAG, "html set "+html.toString());
             }else {
-                Log.d(TAG, "Exception after html creation: ");
+          //      Log.d(TAG, "Exception after html creation: ");
                 throw new IOException("Redirected to wrong domain " + document.location());
             }
         } catch (HttpStatusException e) {
 
-            Log.d(TAG, e.getMessage().toString()+" : httpstatusexception");
+          //  Log.d(TAG, e.getMessage().toString()+" : httpstatusexception");
             return null;
         } catch (IOException e) {
             e.printStackTrace();
-            Log.d(TAG, e.getMessage().toString()+" : some other generic exception");
-            Log.d(TAG, e.getMessage().toString());
+          //  Log.d(TAG, e.getMessage().toString()+" : some other generic exception");
+          //  Log.d(TAG, e.getMessage().toString());
             return null;
         }
         Pattern p = Pattern.compile(
@@ -87,7 +87,7 @@ public class AZLyrics extends AsyncTask<String, Void, String> {
             text = text.replaceAll("\\[[^\\[]*\\]", "");
             text = text.replaceAll("<i>", "").replaceAll("</i>", "").replaceAll("<br>", "");
 
-            Log.d(TAG, "FOUND LYRICS: "+text);
+          //  Log.d(TAG, "FOUND LYRICS: "+text);
             return text;
         } else
             return null;

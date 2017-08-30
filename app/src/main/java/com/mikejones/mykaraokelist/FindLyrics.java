@@ -35,7 +35,7 @@ public class FindLyrics extends AsyncTask<String, Void, String> {
         songName = params[0];
         artist = params[1];
 
-        Log.d(TAG, "artist: "+artist+"  title: "+songName);
+      //  Log.d(TAG, "artist: "+artist+"  title: "+songName);
         lyrics = AZLyrics.fromMetaData(songName, artist);
         return lyrics;
     }
@@ -50,7 +50,7 @@ public class FindLyrics extends AsyncTask<String, Void, String> {
         song.setLyrics(lyrics);
 
 
-        Log.d("AddSongDialog", lyrics+"");
+     //   Log.d("AddSongDialog", lyrics+"");
         activity.onReturnNewSong(song);
         dialog.dismiss();
 

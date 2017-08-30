@@ -22,7 +22,6 @@ import android.support.v7.widget.Toolbar;
 
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,8 +30,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import android.widget.FrameLayout;
-import android.widget.TextView;
-
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -40,13 +37,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 
-import static android.view.View.TEXT_ALIGNMENT_CENTER;
 
 
 
 public class ListActivity extends AppCompatActivity implements AddSongDialog.AddSongDialogListener, AudioFingerprintDialog.AddAudioSongDialogListener{
     public static final String TAG = "ListActivity";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
 
     private RecyclerView songListView;
     private SongListviewAdapter songListviewAdapter;
@@ -77,13 +74,18 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
         initalizeDatabase();
         initalizeAnimations();
         initalizeViews();
-
-
-         String [] permissions = {Manifest.permission.RECORD_AUDIO};
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-
+        initalizeTouchHelper();
 
     }
+
+    private void initalizeTouchHelper(){
+        ItemTouchHelper.Callback helper = new SimpleItemTouchHelperCallback(songListviewAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(helper);
+        touchHelper.attachToRecyclerView(songListView);
+        songListView.setLayoutManager(new LinearLayoutManager(this));
+
+    }
+
 
     private void initalizeDatabase(){
         db = new FirebaseManger();
@@ -102,6 +104,9 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
 
         manualEntryFAB.setVisibility(View.INVISIBLE);
         audioEntryFAB.setVisibility(View.INVISIBLE);
+
+        songListviewAdapter = new SongListviewAdapter(this, db.getSongListReference());
+        songListView.setAdapter(songListviewAdapter);
 
 
         mainFAB.setOnClickListener(new View.OnClickListener() {
@@ -141,7 +146,12 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
             @Override
             public void onClick(View v) {
 
-                showAudioFingerprintDialog();
+                if(ActivityCompat.checkSelfPermission(ListActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(ListActivity.this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+                }else{
+                    showAudioFingerprintDialog();
+                }
+
                 if(buttonsShown){
 
                     hideFABs();
@@ -153,6 +163,7 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
 
             }
         });
+
 
 
     }
@@ -293,7 +304,7 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
     public void onReturnNewSong(Song song) {
         //TODO: deal with new song
 
-        Log.d(TAG, "onReturnNewSong called");
+    //    Log.d(TAG, "onReturnNewSong called");
 
         addSongToList(song);
         dialog.dismiss();
@@ -303,6 +314,7 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
 
 
     public void addSongToList(final Song song){
+
 
         db.getSongListReference().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -325,13 +337,15 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
     public void onStart(){
         super.onStart();
 
-        songListviewAdapter = new SongListviewAdapter(this, db.getSongListReference());
-        songListView.setAdapter(songListviewAdapter);
 
-        ItemTouchHelper.Callback helper = new SimpleItemTouchHelperCallback(songListviewAdapter);
-        ItemTouchHelper touchHelper = new ItemTouchHelper(helper);
-        touchHelper.attachToRecyclerView(songListView);
-        songListView.setLayoutManager(new LinearLayoutManager(this));
+
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+
 
     }
 
@@ -343,7 +357,12 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
                 permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 break;
         }
-        if (!permissionToRecordAccepted ) finish();
+        if (!permissionToRecordAccepted ){
+            Snackbar.make(findViewById(R.id.constLayout), "Permission needed for Audio Identification.", Snackbar.LENGTH_SHORT).show();
+        }else{
+            showAudioFingerprintDialog();
+
+        }
 
     }
 

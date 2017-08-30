@@ -133,19 +133,19 @@ public class AudioFingerprintDialog extends DialogFragment{
 
         // check the client id and tag have been set
         if ( (gnsdkClientId == null) || (gnsdkClientTag == null) ){
-            Log.e(TAG, "gnsdk client id or tag issue");
+         //   Log.e(TAG, "gnsdk client id or tag issue");
             return;
         }
 
         // get the gnsdk license from the application assets
         if ( (gnsdkLicenseFilename == null) || (gnsdkLicenseFilename.length() == 0) ){
 
-            Log.e(TAG, "License filename not set");
+         //   Log.e(TAG, "License filename not set");
         } else {
             gnsdkLicense = getAssetAsString( gnsdkLicenseFilename );
             if ( gnsdkLicense == null ){
 
-                Log.e(TAG, "License file not found: " + gnsdkLicenseFilename);
+            //    Log.e(TAG, "License file not found: " + gnsdkLicenseFilename);
                 return;
             }
         }
@@ -154,7 +154,7 @@ public class AudioFingerprintDialog extends DialogFragment{
         // get a user, if no user stored persistently a new user is registered and stored
         // Note: Android persistent storage used, so no GNSDK storage provider needed to store a user
         try {
-            Log.d(TAG, gnsdkLicense);
+          //  Log.d(TAG, gnsdkLicense);
 
             // GnManager must be created first, it initializes GNSDK
             gnManager = new GnManager(getActivity().getApplicationContext(), gnsdkLicense, GnLicenseInputMode.kLicenseInputModeString );
@@ -209,12 +209,12 @@ public class AudioFingerprintDialog extends DialogFragment{
                 assetStream.close();
 
             }else{
-                Log.e(appString, "Asset not found:" + assetName);
+               // Log.e(appString, "Asset not found:" + assetName);
             }
 
         } catch (IOException e) {
 
-            Log.e( appString, "Error getting asset as string: " + e.getMessage() );
+           // Log.e( appString, "Error getting asset as string: " + e.getMessage() );
 
         }
 
@@ -227,13 +227,13 @@ public class AudioFingerprintDialog extends DialogFragment{
         @Override
         public void musicIdStreamProcessingStatusEvent(GnMusicIdStreamProcessingStatus status, IGnCancellable iGnCancellable) {
 
-            Log.d(TAG, "musicIdStreamProcessingStatusEvent called: "+status.toString());
+          //  Log.d(TAG, "musicIdStreamProcessingStatusEvent called: "+status.toString());
 
 
             if (GnMusicIdStreamProcessingStatus.kStatusProcessingAudioStarted.compareTo(status) == 0) {
                 try {
 
-                    Log.i(TAG, "calling idnow");
+                  //  Log.i(TAG, "calling idnow");
                     musicIdStream.identifyAlbumAsync();
 
 
@@ -253,14 +253,14 @@ public class AudioFingerprintDialog extends DialogFragment{
         @Override
         public void musicIdStreamIdentifyingStatusEvent(GnMusicIdStreamIdentifyingStatus event, IGnCancellable iGnCancellable) {
 
-            Log.d(TAG, "musicIdStreamIdentifyingStatusEvent called: "+event.toString());
+          //  Log.d(TAG, "musicIdStreamIdentifyingStatusEvent called: "+event.toString());
 
         }
 
         @Override
         public void musicIdStreamAlbumResult(GnResponseAlbums result, IGnCancellable iGnCancellable) {
 
-            Log.d(TAG, "musicIdStreamAlbumResult called: ");
+         //   Log.d(TAG, "musicIdStreamAlbumResult called: ");
             AudioFingerprintDialog.AddAudioSongDialogListener activity = (AudioFingerprintDialog.AddAudioSongDialogListener) getActivity();
 
 
@@ -277,7 +277,7 @@ public class AudioFingerprintDialog extends DialogFragment{
 
                     String trackTitle = result.albums().at(0).next().trackMatched().title().display();
 
-                    Log.d(TAG, "--------------------"+artist+"  "+ trackTitle+"---------------");
+              //      Log.d(TAG, "--------------------"+artist+"  "+ trackTitle+"---------------");
 
                     new Thread(new AudioProcessStopRunnable()).start();
                     getDialog().dismiss();
@@ -288,7 +288,7 @@ public class AudioFingerprintDialog extends DialogFragment{
 
                 }
                 else{
-                    Log.d(TAG, "NO MATCH FOUND");
+                //    Log.d(TAG, "NO MATCH FOUND");
                     isMatchFound = false;
                     new Thread(new AudioProcessStopRunnable()).start();
 
@@ -311,7 +311,7 @@ public class AudioFingerprintDialog extends DialogFragment{
             long errorCode = error.errorCode();
             isMatchFound = false;
 
-            Log.d(TAG, "musicIdStreamIdentifyCompletedWithError called: "+errorCode+"  "+error.errorDescription());
+         //   Log.d(TAG, "musicIdStreamIdentifyCompletedWithError called: "+errorCode+"  "+error.errorDescription());
 
             //GnMusicIdStream.audioProcessStop() waits for this result callback to finish,
             //so call audioProcessStop() in another thread and don't block here
@@ -325,7 +325,7 @@ public class AudioFingerprintDialog extends DialogFragment{
         @Override
         public void statusEvent(GnStatus status, long l, long l1, long l2, IGnCancellable iGnCancellable) {
 
-            Log.d(TAG, "statusEvent called: "+status.toString());
+          //  Log.d(TAG, "statusEvent called: "+status.toString());
 
         }
     }
@@ -343,7 +343,7 @@ public class AudioFingerprintDialog extends DialogFragment{
                 musicIdStream.audioProcessStart( mic );
 
             } catch (GnException e) {
-                Log.e( TAG, e.errorCode() + ", " + e.errorDescription() + ", " + e.errorModule() );
+             //   Log.e( TAG, e.errorCode() + ", " + e.errorDescription() + ", " + e.errorModule() );
 
 
             } catch (Exception e){
@@ -384,9 +384,9 @@ public class AudioFingerprintDialog extends DialogFragment{
 
                 } catch (GnException e) {
 
-                    Log.e(TAG,  e.errorCode() + ", "
-                            + e.errorDescription() + ", "
-                            + e.errorModule());
+                 //   Log.e(TAG,  e.errorCode() + ", "
+                  //          + e.errorDescription() + ", "
+                    //        + e.errorModule());
 
                 }
 

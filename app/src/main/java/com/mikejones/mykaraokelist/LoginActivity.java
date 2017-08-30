@@ -9,6 +9,7 @@ import android.content.Intent;
 
 import android.support.annotation.NonNull;
 
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.AsyncTask;
@@ -132,7 +133,7 @@ public class LoginActivity extends AppCompatActivity {
                                         InputMethodManager inputMethodManager = (InputMethodManager)getApplicationContext().getSystemService(Activity.INPUT_METHOD_SERVICE);
                                         inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                                         Log.d(TAG, mEmailView.getText().toString() + " : Email sent.");
-                                        Toast.makeText(getApplicationContext(), "Email sent to " + mEmailView.getText().toString(), Toast.LENGTH_SHORT).show();
+                                        Snackbar.make(findViewById(R.id.mainLayout), "Email sent to " + mEmailView.getText().toString(), Toast.LENGTH_SHORT).show();
                                     } else {
                                         Log.d(TAG, getString(R.string.email_does_not_exist) + " : " + mEmailView.getText().toString());
                                         mEmailView.setError(getString(R.string.email_does_not_exist));

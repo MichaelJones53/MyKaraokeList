@@ -56,7 +56,7 @@ public class FirebaseManger {
     }
 
     public void setSongIndex(String ref, int index){
-        Log.d(TAG, "setting index value");
+      //  Log.d(TAG, "setting index value");
         songlistReference.child(ref).child("index").setValue(index);
 
     }
