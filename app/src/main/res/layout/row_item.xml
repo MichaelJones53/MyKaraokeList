@@ -55,8 +55,9 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/list_background_rounded_corners">
         android:background="@drawable/list_background_rounded_corners"
-        >
+
 
         <RelativeLayout
             android:id="@+id/entryLayout"
@@ -71,15 +72,14 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
 
-                android:layout_alignParentTop="true"
-                android:layout_marginTop="10dp"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="10dp"
                 android:background="@drawable/microphone_angled"
                 android:contentDescription="@string/lyrics_image"
                 android:padding="5dp"
                 android:scaleType="fitXY" />
-
 
 
             <TextView
@@ -118,7 +118,6 @@
                 android:textColor="@color/colorArtistName"
                 android:textSize="18sp"
                 android:textStyle="bold" />
-
 
 
         </RelativeLayout>

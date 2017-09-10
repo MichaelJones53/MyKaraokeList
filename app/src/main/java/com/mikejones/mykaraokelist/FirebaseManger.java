@@ -30,10 +30,6 @@ public class FirebaseManger {
 
     }
 
-    public DatabaseReference getUserDatabaseReference(){
-        return firebaseDatabase.child("users").child(currentUID);
-    }
-
     public DatabaseReference getSongListReference(){
         return songlistReference;
     }
@@ -41,31 +37,5 @@ public class FirebaseManger {
     public void addSong(Song song){
         songlistReference.push().setValue(song);
 
-
-    }
-
-    public void removeSong(String ref){
-
-        songlistReference.child(ref).removeValue();
-    }
-
-    public void writeNewUser(User user){
-
-        firebaseDatabase.child("users").child(user.getUid()).setValue(user);
-
-    }
-
-    public void setSongIndex(String ref, int index){
-      //  Log.d(TAG, "setting index value");
-        songlistReference.child(ref).child("index").setValue(index);
-
-    }
-
-    public ArrayList<Song> getUserSongs(){
-        return null;
-    }
-
-    public String getUID(){
-        return currentUID;
     }
 }

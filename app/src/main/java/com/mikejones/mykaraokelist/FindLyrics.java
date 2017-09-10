@@ -36,7 +36,7 @@ public class FindLyrics extends AsyncTask<String, Void, String> {
         artist = params[1];
 
       //  Log.d(TAG, "artist: "+artist+"  title: "+songName);
-        lyrics = AZLyrics.fromMetaData(songName, artist);
+        lyrics = AZLyrics.fromMetaData(artist, songName);
         return lyrics;
     }
 
@@ -44,16 +44,22 @@ public class FindLyrics extends AsyncTask<String, Void, String> {
     protected void onPostExecute(String lyrics) {
         // TODO: do something with the feed
 
-        AddSongDialog.AddSongDialogListener activity = (AddSongDialog.AddSongDialogListener) this.activity;
+        AddSongDialog.AddSongDialogListener act = (AddSongDialog.AddSongDialogListener) this.activity;
         Song song = new Song(songName, artist);
 
         song.setLyrics(lyrics);
 
 
      //   Log.d("AddSongDialog", lyrics+"");
-        activity.onReturnNewSong(song);
+        act.onReturnNewSong(song);
         dialog.dismiss();
 
+        activity = null;
+        act = null;
 
+        Log.d(TAG, "dialog dismissed from findlyrics");
+        if(dialog == null){
+            Log.d(TAG, "dialog is null from findlyrics");
+        }
     }
 }

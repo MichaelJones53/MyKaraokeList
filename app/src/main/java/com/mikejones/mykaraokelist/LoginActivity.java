@@ -40,6 +40,8 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 /**
  * A login screen that offers login via email/password.
@@ -65,7 +67,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button mCreateNewAccountButton;
     private Button mEmailSignInButton;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private FirebaseManger db;
+    private DatabaseReference db;
 
 
     @Override
@@ -75,9 +77,19 @@ public class LoginActivity extends AppCompatActivity {
         mLoginFormView = findViewById(R.id.email_login_form);
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
-        db = new FirebaseManger();
         mProgressView = new ProgressDialog(this);
 
+        if (mFirebaseUser != null) {
+            mProgressView.dismiss();
+            Intent intent = new Intent(this, com.mikejones.mykaraokelist.ListActivity.class);
+            intent.setFlags(intent .getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY);
+            startActivity(intent);
+            finish();
+
+        }
+
+        Log.d(TAG, "it continued");
+        db = DatabaseUtils.getDatabase().getReference();
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -155,32 +167,19 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // [START auth_state_listener]
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                    Intent intent = new Intent(LoginActivity.this, com.mikejones.mykaraokelist.ListActivity.class);
-                    LoginActivity.this.startActivity(intent);
-                    mProgressView.dismiss();
-                    finish();
-                } else {
-                    // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-            }
-        };
-        // [END auth_state_listener]
 
-        if (mFirebaseUser != null) {
-            mProgressView.dismiss();
-            Intent intent = new Intent(this, com.mikejones.mykaraokelist.ListActivity.class);
-            startActivity(intent);
-            finish();
-        }
+
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Log.d(TAG, "ondestroy called");
+        mAuthTask = null;
+        mFirebaseAuth = null;
+        mFirebaseUser = null;
+        mProgressView = null;
+        db=null;
 
     }
 
@@ -248,7 +247,29 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        mFirebaseAuth.addAuthStateListener(mAuthListener);
+        Log.d(TAG, "onStart called");
+        // [START auth_state_listener]
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    Intent intent = new Intent(LoginActivity.this, com.mikejones.mykaraokelist.ListActivity.class);
+                    LoginActivity.this.startActivity(intent);
+                    mProgressView.dismiss();
+                    finish();
+                } else {
+                    // User is signed out
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
+            }
+        };
+        // [END auth_state_listener]
+
+
+       mFirebaseAuth.addAuthStateListener(mAuthListener);
     }
     // [END on_start_add_listener]
 
@@ -256,7 +277,9 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
+        Log.d(TAG, "onStop called");
         if (mAuthListener != null) {
+            Log.d(TAG, "listener removed");
             mFirebaseAuth.removeAuthStateListener(mAuthListener);
         }
     }
@@ -317,8 +340,9 @@ public class LoginActivity extends AppCompatActivity {
 
 
                         if (task.isSuccessful()) {
+                            String uid = mFirebaseAuth.getCurrentUser().getUid();
 
-                            db.writeNewUser(new User(mEmail, mFirebaseAuth.getCurrentUser().getUid()));
+                           db.child("users").child(uid).setValue(new User(mEmail, uid));
                         }
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
@@ -375,6 +399,8 @@ public class LoginActivity extends AppCompatActivity {
             mAuthTask = null;
             mProgressView.dismiss();
         }
+
+
 
 
 

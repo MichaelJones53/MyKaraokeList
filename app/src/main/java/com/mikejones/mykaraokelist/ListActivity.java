@@ -14,6 +14,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -31,16 +32,10 @@ import android.view.animation.AnimationUtils;
 
 import android.widget.FrameLayout;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 
 
-
-
-public class ListActivity extends AppCompatActivity implements AddSongDialog.AddSongDialogListener, AudioFingerprintDialog.AddAudioSongDialogListener{
+public class ListActivity extends AppCompatActivity implements AddSongDialog.AddSongDialogListener, AudioFingerprintDialog.AddAudioSongDialogListener, UpdateSongDialog.UpdateSongDialogListener{
     public static final String TAG = "ListActivity";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private String [] permissions = {Manifest.permission.RECORD_AUDIO};
@@ -58,9 +53,13 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
     private Animation rotateForwardMainFABAnimation;
     private Animation rotateBackwardMainFABAnimation;
     private DialogFragment dialog;
-    private FirebaseManger db;
+    private ItemTouchHelper.Callback helper;
+    private ItemTouchHelper touchHelper;
 
     private boolean buttonsShown = false;
+    private boolean initialReq = true;
+
+    private FragmentManager fm;
 
 
     private boolean permissionToRecordAccepted = false;
@@ -71,27 +70,35 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
 
-        initalizeDatabase();
         initalizeAnimations();
         initalizeViews();
         initalizeTouchHelper();
 
+        fm = getSupportFragmentManager();
+
+        if(ContextCompat.checkSelfPermission(ListActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(ListActivity.this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+        }else{
+            initialReq = false;
+        }
+
     }
 
     private void initalizeTouchHelper(){
-        ItemTouchHelper.Callback helper = new SimpleItemTouchHelperCallback(songListviewAdapter);
-        ItemTouchHelper touchHelper = new ItemTouchHelper(helper);
-        touchHelper.attachToRecyclerView(songListView);
+        helper = new SimpleItemTouchHelperCallback(songListviewAdapter);
+        touchHelper = new ItemTouchHelper(helper);
         songListView.setLayoutManager(new LinearLayoutManager(this));
+        touchHelper.attachToRecyclerView(songListView);
+
+
+
 
     }
 
 
-    private void initalizeDatabase(){
-        db = new FirebaseManger();
-    }
 
-
+//TODO: it is not reading from firebase (using presistant data primarially)
+     //TODO:  write algorithm for swapping!!!
     private void initalizeViews(){
         toolbar = (Toolbar) findViewById(R.id.bottomToolBar);
         setSupportActionBar(toolbar);
@@ -105,7 +112,7 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
         manualEntryFAB.setVisibility(View.INVISIBLE);
         audioEntryFAB.setVisibility(View.INVISIBLE);
 
-        songListviewAdapter = new SongListviewAdapter(this, db.getSongListReference());
+        songListviewAdapter = new SongListviewAdapter(this);
         songListView.setAdapter(songListviewAdapter);
 
 
@@ -146,7 +153,7 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
             @Override
             public void onClick(View v) {
 
-                if(ActivityCompat.checkSelfPermission(ListActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
+                if(ContextCompat.checkSelfPermission(ListActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
                     ActivityCompat.requestPermissions(ListActivity.this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
                 }else{
                     showAudioFingerprintDialog();
@@ -164,6 +171,56 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
             }
         });
 
+
+
+
+
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+
+        //songListviewAdapter.addListener();
+
+
+
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        Log.d(TAG, "onStop called");
+        songListviewAdapter.cleanupListener();
+
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+
+        Log.d(TAG, "ondestroy called");
+
+
+        songListView = null;
+        songListviewAdapter = null;
+        toolbar = null;
+        mainFAB = null;
+       manualEntryFAB = null;
+        audioEntryFAB = null;
+         showManualFABAnimation = null;
+        showAudioFABAnimation = null;
+       hideManualFABAnimation = null;
+       hideAudioFABAnimation = null;
+        rotateForwardMainFABAnimation = null;
+         rotateBackwardMainFABAnimation = null;
+       dialog = null;
+
+
+
+
+
+         fm = null;
 
 
     }
@@ -193,9 +250,7 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
     public boolean onOptionsItemSelected(MenuItem item){
         switch(item.getItemId()){
             case R.id.sign_out:
-                FirebaseAuth fAuth = FirebaseAuth.getInstance();
-                fAuth.signOut();
-                songListviewAdapter.cleanupListener();
+                DatabaseUtils.signOut();
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
                 finish();
@@ -220,12 +275,10 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) audioEntryFAB.getLayoutParams();
         layoutParams.rightMargin += (int) (audioEntryFAB.getWidth() * -.8);
         layoutParams.bottomMargin += (int) (audioEntryFAB.getHeight() * 1.2);
+
         audioEntryFAB.setLayoutParams(layoutParams);
-
         audioEntryFAB.startAnimation(showAudioFABAnimation);
-
         audioEntryFAB.setClickable(true);
-
     }
 
 
@@ -233,10 +286,9 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) manualEntryFAB.getLayoutParams();
         layoutParams.rightMargin += (int) (manualEntryFAB.getWidth() * .8);
         layoutParams.bottomMargin += (int) (manualEntryFAB.getHeight() * 1.2);
+
         manualEntryFAB.setLayoutParams(layoutParams);
-
         manualEntryFAB.startAnimation(showManualFABAnimation);
-
         manualEntryFAB.setClickable(true);
     }
 
@@ -262,36 +314,42 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
 
 
     private void showNewSongDialog() {
-        FragmentManager fm = getSupportFragmentManager();
+
         dialog = AddSongDialog.newInstance();
         dialog.show(fm, "fragment_edit_name");
     }
 
     public void showNewSongDialogWithSong(String title, String artist) {
-        dialog.dismiss();
 
-        FragmentManager fm = getSupportFragmentManager();
         dialog = AddSongDialog.newInstanceWithSong(title, artist);
         dialog.show(fm, "fragment_edit_name");
     }
 
     private void showAudioFingerprintDialog(){
-        FragmentManager fm = getSupportFragmentManager();
+
         dialog = AudioFingerprintDialog.newInstance();
         dialog.show(fm, "fragment_edit_name");
 
+
     }
+
 
     @Override
     public void onReturnNewAudioSong(String title, String artist) {
         Log.d(TAG, "onReturnNewAudioSong called");
+        if(dialog != null && dialog.isVisible()){
+            dialog.dismissAllowingStateLoss();
+        }
+
         showNewSongDialogWithSong(title, artist);
     }
 
     @Override
     public void onReturnNoMatchFound() {
         Log.d(TAG, "onReturnNoMatchFound called");
-        dialog.dismiss();
+        if(dialog != null && dialog.isVisible()){
+            dialog.dismissAllowingStateLoss();
+        }
 
         Snackbar message = Snackbar.make(findViewById(R.id.constLayout), "Unable To Identify Song", Snackbar.LENGTH_SHORT);
         message.show();
@@ -303,47 +361,38 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
     @Override
     public void onReturnNewSong(Song song) {
         //TODO: deal with new song
+        Log.d(TAG, "onReturnNewSong called");
 
-    //    Log.d(TAG, "onReturnNewSong called");
+        if(dialog != null && dialog.isVisible()){
+            dialog.dismissAllowingStateLoss();
+        }
 
-        addSongToList(song);
-        dialog.dismiss();
+        songListviewAdapter.addSong(song);
+
 
 
     }
-
-
-    public void addSongToList(final Song song){
-
-
-        db.getSongListReference().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                // Push the song, it will appear in the list
-                db.addSong(song);
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-
     @Override
-    public void onStart(){
-        super.onStart();
+    public void onReturnUpdatedSong(String key, Song song) {
 
+        Log.d(TAG, "onReturnNewSong called");
 
+        if(dialog != null && dialog.isVisible()){
+            dialog.dismissAllowingStateLoss();
+        }
 
+        songListviewAdapter.updateSong(key, song);
     }
+
+
+
+
 
     @Override
     public void onResume(){
         super.onResume();
+
+
 
 
 
@@ -354,13 +403,16 @@ public class ListActivity extends AppCompatActivity implements AddSongDialog.Add
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode){
             case REQUEST_RECORD_AUDIO_PERMISSION:
-                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                    permissionToRecordAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 break;
         }
-        if (!permissionToRecordAccepted ){
-            Snackbar.make(findViewById(R.id.constLayout), "Permission needed for Audio Identification.", Snackbar.LENGTH_SHORT).show();
-        }else{
+        if (permissionToRecordAccepted ) {
+            if (!initialReq) {
+
             showAudioFingerprintDialog();
+            }
+        }else{
+            Snackbar.make(findViewById(R.id.constLayout), "Permission needed for Audio Identification.", Snackbar.LENGTH_SHORT).show();
 
         }
 

@@ -29,7 +29,6 @@ public class AddSongDialog extends DialogFragment {
     private EditText artistNameTextview;
     private Button cancelButton;
     private Button okButton;
-    private static boolean isSongProvided = false;
 
 //TODO: add spinner during website scape for lyrics.  seems fast enough currently that i dont need to bother right now
 
@@ -46,7 +45,6 @@ public class AddSongDialog extends DialogFragment {
     }
 
     public static AddSongDialog newInstanceWithSong(String title, String artist){
-        isSongProvided = true;
         AddSongDialog dialog = new AddSongDialog();
         Bundle args = new Bundle();
         args.putString("TITLE", title);
@@ -77,10 +75,8 @@ public class AddSongDialog extends DialogFragment {
         Bundle args = this.getArguments();
 
         if(args != null){
-            if(isSongProvided){
                 songTitleTextview.setText(args.getString("TITLE"));
                 artistNameTextview.setText(args.getString("ARTIST"));
-            }
         }
 
 
@@ -105,8 +101,6 @@ public class AddSongDialog extends DialogFragment {
                 } else if(artistName.equals("")){
                     Toast.makeText(getActivity(), "artist is empty", Toast.LENGTH_SHORT).show();
                 }else{
-
-
                     FindLyrics findLyrics = new FindLyrics(getActivity(), new ProgressDialog(getContext()));
                     findLyrics.execute(songTitle, artistName);
                 }

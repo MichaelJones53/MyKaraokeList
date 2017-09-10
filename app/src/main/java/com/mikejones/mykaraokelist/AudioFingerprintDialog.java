@@ -172,7 +172,6 @@ public class AudioFingerprintDialog extends DialogFragment{
         // Internally pulling data is a blocking call, repeatedly called until
         // audio processing is stopped. This cannot be called on the main thread.
         new Thread(new AudioProcessRunnable()).start();
-
         } catch (GnException e) {
             e.printStackTrace();
         }
@@ -233,7 +232,7 @@ public class AudioFingerprintDialog extends DialogFragment{
             if (GnMusicIdStreamProcessingStatus.kStatusProcessingAudioStarted.compareTo(status) == 0) {
                 try {
 
-                  //  Log.i(TAG, "calling idnow");
+                    Log.i(TAG, "calling idnow");
                     musicIdStream.identifyAlbumAsync();
 
 
@@ -261,8 +260,6 @@ public class AudioFingerprintDialog extends DialogFragment{
         public void musicIdStreamAlbumResult(GnResponseAlbums result, IGnCancellable iGnCancellable) {
 
          //   Log.d(TAG, "musicIdStreamAlbumResult called: ");
-            AudioFingerprintDialog.AddAudioSongDialogListener activity = (AudioFingerprintDialog.AddAudioSongDialogListener) getActivity();
-
 
             try {
 
@@ -279,6 +276,7 @@ public class AudioFingerprintDialog extends DialogFragment{
 
               //      Log.d(TAG, "--------------------"+artist+"  "+ trackTitle+"---------------");
 
+
                     new Thread(new AudioProcessStopRunnable()).start();
                     getDialog().dismiss();
 
@@ -291,18 +289,12 @@ public class AudioFingerprintDialog extends DialogFragment{
                 //    Log.d(TAG, "NO MATCH FOUND");
                     isMatchFound = false;
                     new Thread(new AudioProcessStopRunnable()).start();
-
-
-
-
+                    activity.onReturnNoMatchFound();
                 }
-
-
-
             } catch (GnException e) {
                 e.printStackTrace();
             }
-
+            onDestroy();
         }
 
         @Override
@@ -316,6 +308,8 @@ public class AudioFingerprintDialog extends DialogFragment{
             //GnMusicIdStream.audioProcessStop() waits for this result callback to finish,
             //so call audioProcessStop() in another thread and don't block here
             new Thread(new AudioProcessStopRunnable()).start();
+            activity.onReturnNoMatchFound();
+            onDestroy();
 
 
 
@@ -340,6 +334,7 @@ public class AudioFingerprintDialog extends DialogFragment{
             try {
 
                 // start audio processing with GnMic, GnMusicIdStream pulls data from GnMic internally
+                Log.d(TAG, "Audio Process started");
                 musicIdStream.audioProcessStart( mic );
 
             } catch (GnException e) {
@@ -361,26 +356,14 @@ public class AudioFingerprintDialog extends DialogFragment{
         @Override
         public void run() {
 
-            System.out.println("beginning thread stopping");
+
             if (musicIdStream != null) {
 
                 try {
-                    System.out.println("try entered");
                     // stopping audio processing stops the audio processing thread
                     musicIdStream.audioProcessStop();
-                    if(!isMatchFound){
-
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                activity.onReturnNoMatchFound();
-                            }
-                        });
-
-                    }
-
-                    System.out.println("thread stopped");
-
+                    Log.d(TAG, "AudioProcessStopped");
+                    mic = null;
 
                 } catch (GnException e) {
 

@@ -24,7 +24,6 @@ public class UpdateSongDialog extends DialogFragment {
     private Button cancelButton;
     private Button okButton;
     private String key;
-    private static SongListviewAdapter adapter;
 
 //TODO: add spinner during website scape for lyrics.  seems fast enough currently that i dont need to bother right now
 
@@ -84,13 +83,17 @@ public class UpdateSongDialog extends DialogFragment {
                 } else if(artistName.equals("")){
                     Toast.makeText(getActivity(), "artist is empty", Toast.LENGTH_SHORT).show();
                 }else{
-                    SongListviewAdapter.UpdateEntry updateEntry = new SongListviewAdapter.UpdateEntry(new ProgressDialog(getContext()));
+                    SongListviewAdapter.UpdateEntry updateEntry = new SongListviewAdapter.UpdateEntry(getActivity(), new ProgressDialog(getContext()));
                     updateEntry.execute(key, artistName, songTitle);
                     getDialog().dismiss();
                 }
             }
         });
 
+    }
+
+    public interface UpdateSongDialogListener {
+        public void onReturnUpdatedSong(String key, Song song);
     }
 
 
