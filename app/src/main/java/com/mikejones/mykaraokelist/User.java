@@ -13,7 +13,6 @@ public class User {
     private ArrayList<Song> songList = new ArrayList<Song>();
 
     public User(){
-
     }
 
     public User(String e, String id){

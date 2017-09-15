@@ -58,17 +58,28 @@ public class UpdateSongDialog extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         key = getArguments().getString("SONG_KEY");
 
+
+
         // Get field from view
         songTitleTextview = (EditText) view.findViewById(R.id.song_title_textview);
         artistNameTextview = (EditText) view.findViewById(R.id.artist_name_textview);
         cancelButton = (Button) view.findViewById(R.id.cancel_button);
         okButton = (Button) view.findViewById(R.id.add_button);
 
+        Song song = SongRecyclerViewAdapter.getSongFromKey(key);
+        if(song!= null){
+            songTitleTextview.setText(song.getTitle());;
+            artistNameTextview.setText(song.getArtist());
+        }
+
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getDialog().dismiss();
+                UpdateSongDialogListener listener = (UpdateSongDialogListener) getActivity();
+                listener.onCancelUpdateSong(key);
+
             }
         });
 
@@ -83,9 +94,9 @@ public class UpdateSongDialog extends DialogFragment {
                 } else if(artistName.equals("")){
                     Toast.makeText(getActivity(), "artist is empty", Toast.LENGTH_SHORT).show();
                 }else{
-                    SongListviewAdapter.UpdateEntry updateEntry = new SongListviewAdapter.UpdateEntry(getActivity(), new ProgressDialog(getContext()));
+                    SongRecyclerViewAdapter.UpdateEntry updateEntry = new SongRecyclerViewAdapter.UpdateEntry(new ProgressDialog(getContext()));
                     updateEntry.execute(key, artistName, songTitle);
-                    getDialog().dismiss();
+                    dismiss();
                 }
             }
         });
@@ -93,7 +104,8 @@ public class UpdateSongDialog extends DialogFragment {
     }
 
     public interface UpdateSongDialogListener {
-        public void onReturnUpdatedSong(String key, Song song);
+        public void onCancelUpdateSong(String key);
+
     }
 
 

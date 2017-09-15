@@ -114,13 +114,12 @@
             android:textSize="12sp" />
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/logoImageView"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:contentDescription="@string/karaoke_image"
             android:elevation="0dp"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/man_singing" />
+            android:scaleType="fitCenter" />
 
     </LinearLayout>
 

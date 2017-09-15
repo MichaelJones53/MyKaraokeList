@@ -35,7 +35,7 @@ public class FindLyrics extends AsyncTask<String, Void, String> {
         songName = params[0];
         artist = params[1];
 
-      //  Log.d(TAG, "artist: "+artist+"  title: "+songName);
+        Log.d(TAG, "artist: "+artist+"  title: "+songName);
         lyrics = AZLyrics.fromMetaData(artist, songName);
         return lyrics;
     }

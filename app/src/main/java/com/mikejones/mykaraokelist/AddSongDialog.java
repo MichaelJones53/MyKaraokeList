@@ -83,7 +83,7 @@ public class AddSongDialog extends DialogFragment {
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getDialog().dismiss();
+                dismiss();
             }
         });
 
@@ -103,6 +103,7 @@ public class AddSongDialog extends DialogFragment {
                 }else{
                     FindLyrics findLyrics = new FindLyrics(getActivity(), new ProgressDialog(getContext()));
                     findLyrics.execute(songTitle, artistName);
+                    dismiss();
                 }
             }
         });

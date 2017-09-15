@@ -278,10 +278,9 @@ public class AudioFingerprintDialog extends DialogFragment{
 
 
                     new Thread(new AudioProcessStopRunnable()).start();
-                    getDialog().dismiss();
-
 
                     activity.onReturnNewAudioSong(trackTitle, artist);
+
 
 
                 }
@@ -290,6 +289,7 @@ public class AudioFingerprintDialog extends DialogFragment{
                     isMatchFound = false;
                     new Thread(new AudioProcessStopRunnable()).start();
                     activity.onReturnNoMatchFound();
+
                 }
             } catch (GnException e) {
                 e.printStackTrace();
@@ -308,6 +308,8 @@ public class AudioFingerprintDialog extends DialogFragment{
             //GnMusicIdStream.audioProcessStop() waits for this result callback to finish,
             //so call audioProcessStop() in another thread and don't block here
             new Thread(new AudioProcessStopRunnable()).start();
+
+
             activity.onReturnNoMatchFound();
             onDestroy();
 
@@ -363,13 +365,12 @@ public class AudioFingerprintDialog extends DialogFragment{
                     // stopping audio processing stops the audio processing thread
                     musicIdStream.audioProcessStop();
                     Log.d(TAG, "AudioProcessStopped");
-                    mic = null;
 
                 } catch (GnException e) {
 
-                 //   Log.e(TAG,  e.errorCode() + ", "
-                  //          + e.errorDescription() + ", "
-                    //        + e.errorModule());
+                    Log.e(TAG,  e.errorCode() + ", "
+                            + e.errorDescription() + ", "
+                            + e.errorModule());
 
                 }
 

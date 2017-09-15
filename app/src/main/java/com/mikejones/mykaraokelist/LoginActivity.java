@@ -1,8 +1,5 @@
 package com.mikejones.mykaraokelist;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -14,7 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import android.os.AsyncTask;
 
-import android.os.Build;
+
 import android.os.Bundle;
 
 import android.text.TextUtils;
@@ -28,6 +25,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,6 +41,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+
 /**
  * A login screen that offers login via email/password.
  */
@@ -51,6 +50,7 @@ public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
+
 
 
     /**
@@ -66,6 +66,7 @@ public class LoginActivity extends AppCompatActivity {
     private View mLoginFormView;
     private Button mCreateNewAccountButton;
     private Button mEmailSignInButton;
+    private ImageView logoImageView;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private DatabaseReference db;
 
@@ -79,6 +80,8 @@ public class LoginActivity extends AppCompatActivity {
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
         mProgressView = new ProgressDialog(this);
 
+
+
         if (mFirebaseUser != null) {
             mProgressView.dismiss();
             Intent intent = new Intent(this, com.mikejones.mykaraokelist.ListActivity.class);
@@ -87,6 +90,9 @@ public class LoginActivity extends AppCompatActivity {
             finish();
 
         }
+
+        logoImageView = (ImageView) findViewById(R.id.logoImageView);
+        logoImageView.setImageBitmap(ImageUtil.decodeSampledBitmapFromResource(getResources(), R.drawable.man_singing, 200, 200));
 
         Log.d(TAG, "it continued");
         db = DatabaseUtils.getDatabase().getReference();
