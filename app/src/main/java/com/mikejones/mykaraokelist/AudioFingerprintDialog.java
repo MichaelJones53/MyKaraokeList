@@ -1,13 +1,11 @@
 package com.mikejones.mykaraokelist;
 
-import android.app.Application;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,10 +13,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.TranslateAnimation;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.gracenote.gnsdk.GnError;
 import com.gracenote.gnsdk.GnException;
@@ -66,9 +61,13 @@ public class AudioFingerprintDialog extends DialogFragment{
     private AudioFingerprintDialog.AddAudioSongDialogListener activity;
 
     private boolean isMatchFound = true;
-    private boolean isError = false;
 
 
+    /**
+     * creates instance of AudioFingerprintDialog statically
+     * @return
+     *      reference to AudioFingerprintDialog
+     */
     public static AudioFingerprintDialog newInstance(){
         AudioFingerprintDialog dialog = new AudioFingerprintDialog();
 

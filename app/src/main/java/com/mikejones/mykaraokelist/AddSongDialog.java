@@ -4,20 +4,16 @@ package com.mikejones.mykaraokelist;
 import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.AsyncTask;
+
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import com.google.android.gms.tasks.OnCompleteListener;
 
 /**
  * Created by MikeJones on 7/24/17.
@@ -30,13 +26,19 @@ public class AddSongDialog extends DialogFragment {
     private Button cancelButton;
     private Button okButton;
 
-//TODO: add spinner during website scape for lyrics.  seems fast enough currently that i dont need to bother right now
 
-
+    /**
+     * no argument constructor
+     */
     public AddSongDialog(){
 
     }
 
+
+    /**
+     * static constructor
+     * @return  instance of AddSongDialog Statically created
+     */
     public static AddSongDialog newInstance(){
         AddSongDialog dialog = new AddSongDialog();
         dialog.setCancelable(false);
@@ -44,6 +46,14 @@ public class AddSongDialog extends DialogFragment {
 
     }
 
+    /**
+     * static constructor
+     * @param title
+     *      title of song
+     * @param artist
+     *      artist of song
+     * @return  instance of AddSongDialog Statically created
+     */
     public static AddSongDialog newInstanceWithSong(String title, String artist){
         AddSongDialog dialog = new AddSongDialog();
         Bundle args = new Bundle();
@@ -113,6 +123,11 @@ public class AddSongDialog extends DialogFragment {
 
 
     public interface AddSongDialogListener {
+        /**
+         * listener called when new song is created
+         * @param song
+         *      song that was created
+         */
         public void onReturnNewSong(Song song);
     }
 
